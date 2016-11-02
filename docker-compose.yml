@@ -1,0 +1,49 @@
+version: "2"
+services:
+
+  mysql:
+    build: ./dev-tools/docker/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - '3306:3306'
+
+  apache-php:
+    build: ./dev-tools/docker/apache-php
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - .:/var/www/html/a2backend
+      - ../data/a2backend:/var/www/html/data
+    depends_on:
+      - mysql
+      - mailcatcher
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+      - PHP_UPLOAD_MAX_FILESIZE=100M
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - pma-sessions:/sessions
+    links:
+      - mysql:db
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    restart: always
+    ports:
+      - 1025:1025
+      - 1080:1080
+
+volumes:
+  db:
+  pma-sessions:
