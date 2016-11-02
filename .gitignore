@@ -49,3 +49,10 @@
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
 
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE-specific config files
+.idea/
