@@ -2,6 +2,8 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\User;
+use AppBundle\Form\UserType;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,94 +11,172 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends FOSRestController
 {
+
     /**
+     * @Rest\View(statusCode=Response::HTTP_OK, serializerGroups={"user"})
      * @Rest\Get("/users")
      */
-    public function getUsersAction(Request $request)
+    public function getUsersAction()
     {
-        $users = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findAll();
-
-        $data = ['getUsersAction' => $users];
-        $view = $this->view($data, Response::HTTP_OK);
-
-        return $view;
-
+        return $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findAll();
     }
 
     /**
+     * @Rest\View(statusCode=Response::HTTP_OK, serializerGroups={"user"})
      * @Rest\Get("/users/{userId}")
      */
     public function getUsersByIdAction(Request $request)
     {
-        $userId = $request->get('userId');
+        $userId = (int) $request->get('userId');
         $user = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->find($userId);
 
         if ($user) {
-            $data = ['getUsersByIdAction' => $user];
-            $view = $this->view($data, Response::HTTP_OK);
+            return $user;
         } else {
-            $data = ['getUsersByIdAction' => null];
-            $view = $this->view($data, Response::HTTP_NOT_FOUND);
+            return $this->userNotFound();
         }
-
-        return $view;
     }
 
     /**
+     * @Rest\View(statusCode=Response::HTTP_CREATED, serializerGroups={"user"})
      * @Rest\Post("/users")
      */
-    public function postUsersAction(Request $request)
+    public function postUserAction(Request $request)
     {
-        $data = ['postUsersAction' => 'not implemented yet'];
-        $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
-        return $view;
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user, ['validation_groups' => ['Default', 'New']]);
+
+        //throw new \Exception(print_r($request, true));
+
+        $form->submit($request->request->all());
+
+        if ($form->isValid()) {
+            $encoder = $this->get('security.password_encoder');
+            // le mot de passe en clair est encodé avant la sauvegarde
+            $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+            $user->setPassword($encoded);
+
+            $em = $this->get('doctrine.orm.entity_manager');
+            $em->persist($user);
+            $em->flush();
+            return $user;
+        } else {
+            return $form;
+        }
     }
 
     /**
-     * @Rest\Put("/users/{userId}")
-     */
-    public function putUsersByIdAction(Request $request)
-    {
-        $userId = $request->get('userId');
-        $data = ['putUsersByIdAction' => 'not implemented yet'];
-        $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
-        return $view;
-    }
-
-    /**
+     * @Rest\View(statusCode=Response::HTTP_NO_CONTENT, serializerGroups={"user"})
      * @Rest\Delete("/users/{userId}")
      */
-    public function deleteUsersByIdAction(Request $request)
+    public function deleteUserAction(Request $request)
     {
-        $userId = $request->get('userId');
-        $data = ['deleteUsersByIdAction' => 'not implemented yet'];
-        $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
-        return $view;
+        $userId = (int) $request->get('userId');
+        $user = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->find($userId);
+
+        if ($user) {
+            $this->getDoctrine()->getManager()->remove($user);
+            $this->getDoctrine()->getManager()->flush();
+            return null;
+        } else {
+            return $this->userNotFound();
+        }
     }
-
-
-
-    /****************
 
     /**
-     * @Route("/user", name="user", type="rest")
-     *
-    public function getUserAction($id)
+     * @Rest\View(serializerGroups={"user"})
+     * @Rest\Put("/users/{id}")
+     */
+    public function updateUserAction(Request $request)
     {
-        return $this->container->get('doctrine.entity_manager')->getRepository('User')->find($id);
+        return $this->updateUser($request, true);
+    }
+
+    /**
+     * @Rest\View(serializerGroups={"user"})
+     * @Rest\Patch("/users/{id}")
+     */
+    public function patchUserAction(Request $request)
+    {
+        return $this->updateUser($request, false);
+    }
+
+    private function updateUser(Request $request, $clearMissing)
+    {
+        $user = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('AppBundle:User')
+            ->find($request->get('id')); // L'identifiant en tant que paramètre n'est plus nécessaire
+        /* @var $user User */
+
+        if (empty($user)) {
+            return $this->userNotFound();
+        }
+
+        if ($clearMissing) { // Si une mise à jour complète, le mot de passe doit être validé
+            $options = ['validation_groups'=>['Default', 'FullUpdate']];
+        } else {
+            $options = []; // Le groupe de validation par défaut de Symfony est Default
+        }
+
+        $form = $this->createForm(UserType::class, $user, $options);
+
+        $form->submit($request->request->all(), $clearMissing);
+
+        if ($form->isValid()) {
+            // Si l'utilisateur veut changer son mot de passe
+            if (!empty($user->getPlainPassword())) {
+                $encoder = $this->get('security.password_encoder');
+                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($encoded);
+            }
+            $em = $this->get('doctrine.orm.entity_manager');
+            $em->merge($user);
+            $em->flush();
+            return $user;
+        } else {
+            return $form;
+        }
+    }
+
+    private function userNotFound()
+    {
+        return \FOS\RestBundle\View\View::create(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
     }
 
 
-    public function getUsersAction()
-    {
-        $data = $this->container->get('doctrine.entity_manager')->getRepository('User')->findAll(); // get data, in this case list of users.
-        $view = $this->view($data, 200)
-            ->setTemplate("MyBundle:Users:getUsers.html.twig")
-            ->setTemplateVar('users')
-        ;
+    /*****************************/
 
-        return $this->handleView($view);
+    /**
+     * @Rest\Get("/authenticate/{username}/{password}/{remember}")
+     */
+    public function getAuthenticateAction(Request $request)
+    {
+        $username = (string) $request->get('username');
+        $password = (string) $request->get('password');
+        $remember = (boolean) $request->get('remember');
+
+        $user = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findOneBy([
+            'email' => $username,
+            'passwordHash' => $password
+        ]);
+
+        // User not found
+        if(! $user instanceof User) {
+            $data = ['error' => [
+                'code' => 'WRONG_USERNAME_OR_PASSWORD',
+                'message' => 'Wrong username or password',
+            ]];
+            return $this->view($data, Response::HTTP_NOT_FOUND);
+        }
+
+        //TODO build auth token
+        $token = '__dummy_token__';
+
+        $data = ['data' => [
+            'user' => $user,
+            'token' => $token
+        ]];
+        return $this->view($data, Response::HTTP_OK);
     }
-*/
 
 }

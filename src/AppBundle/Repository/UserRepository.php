@@ -1,6 +1,7 @@
 <?php
 
 namespace AppBundle\Repository;
+use AppBundle\Entity\User;
 
 /**
  * UserRepository
@@ -10,4 +11,18 @@ namespace AppBundle\Repository;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * Find user using username and clear-text password
+     *
+     * @param string $username
+     * @param string $password
+     * @return null|User
+     */
+    public function getByUsernameAndPassword(string $username, string $password)
+    {
+        return $this->findOneBy(array(
+            'email' => $username,
+            'password_hash' => User::hashPassword($password)
+        ));
+    }
 }

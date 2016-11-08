@@ -3,14 +3,15 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * User
- *
- * @ORM\Table(name="user")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
+ * @ORM\Entity()
+ * @ORM\Table(name="user",
+ *      uniqueConstraints={@ORM\UniqueConstraint(name="user_email_unique",columns={"email"})}
+ * )
  */
-class User
+class User implements UserInterface
 {
     /**
      * @var int
@@ -24,17 +25,35 @@ class User
     /**
      * @var string
      *
-     * @ORM\Column(name="username", type="string", length=255)
+     * @ORM\Column(name="email", type="string", length=255)
      */
-    private $username;
+    private $email;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="password_hash", type="string", length=40)
+     * @ORM\Column(name="password_hash", type="string", length=255)
      */
-    private $password_hash;
+    private $passwordHash;
 
+    /**
+     * @var string
+     */
+    protected $plainPassword;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="first_name", type="string", length=63)
+     */
+    private $firstName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="last_name", type="string", length=63)
+     */
+    private $lastName;
 
     /**
      * Get id
@@ -47,27 +66,27 @@ class User
     }
 
     /**
-     * Set username
+     * Set emails
      *
-     * @param string $username
+     * @param string $email
      *
      * @return User
      */
-    public function setUsername($username)
+    public function setEmail($email)
     {
-        $this->username = $username;
+        $this->email = $email;
 
         return $this;
     }
 
     /**
-     * Get username
+     * Get email
      *
      * @return string
      */
-    public function getUsername()
+    public function getEmail()
     {
-        return $this->username;
+        return $this->email;
     }
 
     /**
@@ -79,7 +98,7 @@ class User
      */
     public function setPasswordHash($passwordHash)
     {
-        $this->password_hash = $passwordHash;
+        $this->passwordHash = $passwordHash;
 
         return $this;
     }
@@ -91,7 +110,129 @@ class User
      */
     public function getPasswordHash()
     {
-        return $this->password_hash;
+        return $this->passwordHash;
+    }
+
+    /**
+     * Set plainPassword
+     *
+     * @param string $plainPassword
+     *
+     * @return User
+     */
+    public function setPlainPassword($plainPassword)
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    /**
+     * Get plainPassword
+     *
+     * @return string
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * Set firstName
+     *
+     * @param string $firstName
+     *
+     * @return User
+     */
+    public function setFirstName($firstName)
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    /**
+     * Get firstName
+     *
+     * @return string
+     */
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * Set lastName
+     *
+     * @param string $lastName
+     *
+     * @return User
+     */
+    public function setLastName($lastName)
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    /**
+     * Get lastName
+     *
+     * @return string
+     */
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPassword()
+    {
+        return $this->getPasswordHash();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPassword($password)
+    {
+        $this->setPasswordHash($password);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRoles()
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSalt()
+    {
+        return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUsername()
+    {
+        return $this->email;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function eraseCredentials()
+    {
+        // Delete sensitive data
+        $this->plainPassword = null;
     }
 }
 

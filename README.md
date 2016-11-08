@@ -19,7 +19,6 @@ Symfony REST Backend for [a2proto](https://github.com/mickaelmarchal/a2proto) - 
 
 ## TODO ##
 - fixtures to fill DB
-- remove requirement for a `data` folder
 - fix dev / prod config
 
 Later
