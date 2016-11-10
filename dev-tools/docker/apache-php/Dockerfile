@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y \
     mcrypt \
     xsl \
     pcntl \
-#    ldap \  # not working, missing ldap.h
   && rm -rf /var/lib/apt/lists/*
 
 
@@ -39,13 +38,10 @@ RUN cd $HOME &&\
 RUN useradd -ms /bin/bash dev
 USER dev
 
-# Note: first line is necessary due to Robo.li not being available in stable version at the moment. Remove this later.
-RUN composer global config minimum-stability RC &&\
-    composer global require "phing/phing=2.*" &&\
+RUN composer global require "phing/phing=2.*" &&\
     composer global require "phpunit/phpunit=*" &&\
     composer global require "theseer/phpdox=@stable" &&\
-    composer global require "phpmetrics/phpmetrics" &&\
-    composer global require "consolidation/robo:~1"
+    composer global require "phpmetrics/phpmetrics"
 
 
 USER root
@@ -75,9 +71,6 @@ COPY ./apache2.conf /etc/apache2/conf-enabled/docker.conf
 COPY ./vhosts.conf /etc/apache2/sites-available/000-vhost.conf
 RUN a2ensite 000-vhost.conf
 
-
-# using "local" environment for app
-ENV APPLICATION_ENV local
 
 # Expose http and https ports
 EXPOSE 80 443
