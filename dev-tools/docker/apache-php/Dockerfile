@@ -53,8 +53,7 @@ ENV PATH $PATH:/home/dev/.composer/vendor/bin/
 
 
 # Create project directories
-RUN mkdir /var/www/html/a2backend &&\
-  mkdir -p /var/www/html/data/log
+RUN mkdir /var/www/html/a2backend
 
 
 # PHP config
