@@ -11,18 +11,5 @@ use AppBundle\Entity\User;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
-    /**
-     * Find user using username and clear-text password
-     *
-     * @param string $username
-     * @param string $password
-     * @return null|User
-     */
-    public function getByUsernameAndPassword(string $username, string $password)
-    {
-        return $this->findOneBy(array(
-            'email' => $username,
-            'password_hash' => User::hashPassword($password)
-        ));
-    }
+
 }

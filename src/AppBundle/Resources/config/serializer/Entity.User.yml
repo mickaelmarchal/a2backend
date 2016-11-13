@@ -2,12 +2,12 @@ AppBundle\Entity\User:
     exclusion_policy: none
     properties:
         id:
-            groups: ['user', 'preference', 'auth-token']
+            groups: ['user', 'preference']
         firstName:
-            groups: ['user', 'preference', 'auth-token']
+            groups: ['user', 'preference']
         lastName:
-            groups: ['user', 'preference', 'auth-token']
+            groups: ['user', 'preference']
         email:
-            groups: ['user', 'preference', 'auth-token']
+            groups: ['user', 'preference']
         preferences:
             groups: ['user']

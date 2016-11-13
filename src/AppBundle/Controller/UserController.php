@@ -14,7 +14,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(statusCode=Response::HTTP_OK, serializerGroups={"user"})
-     * @Rest\Get("/users")
+     * @Rest\Get("/api/users")
      */
     public function getUsersAction()
     {
@@ -23,7 +23,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(statusCode=Response::HTTP_OK, serializerGroups={"user"})
-     * @Rest\Get("/users/{userId}")
+     * @Rest\Get("/api/users/{userId}")
      */
     public function getUsersByIdAction(Request $request)
     {
@@ -39,7 +39,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(statusCode=Response::HTTP_CREATED, serializerGroups={"user"})
-     * @Rest\Post("/users")
+     * @Rest\Post("/api/users")
      */
     public function postUserAction(Request $request)
     {
@@ -67,7 +67,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(statusCode=Response::HTTP_NO_CONTENT, serializerGroups={"user"})
-     * @Rest\Delete("/users/{userId}")
+     * @Rest\Delete("/api/users/{userId}")
      */
     public function deleteUserAction(Request $request)
     {
@@ -85,7 +85,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(serializerGroups={"user"})
-     * @Rest\Put("/users/{id}")
+     * @Rest\Put("/api/users/{id}")
      */
     public function updateUserAction(Request $request)
     {
@@ -94,7 +94,7 @@ class UserController extends FOSRestController
 
     /**
      * @Rest\View(serializerGroups={"user"})
-     * @Rest\Patch("/users/{id}")
+     * @Rest\Patch("/api/users/{id}")
      */
     public function patchUserAction(Request $request)
     {
@@ -141,42 +141,6 @@ class UserController extends FOSRestController
     private function userNotFound()
     {
         return \FOS\RestBundle\View\View::create(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
-    }
-
-
-    /*****************************/
-
-    /**
-     * @Rest\Get("/authenticate/{username}/{password}/{remember}")
-     */
-    public function getAuthenticateAction(Request $request)
-    {
-        $username = (string) $request->get('username');
-        $password = (string) $request->get('password');
-        $remember = (boolean) $request->get('remember');
-
-        $user = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findOneBy([
-            'email' => $username,
-            'passwordHash' => $password
-        ]);
-
-        // User not found
-        if(! $user instanceof User) {
-            $data = ['error' => [
-                'code' => 'WRONG_USERNAME_OR_PASSWORD',
-                'message' => 'Wrong username or password',
-            ]];
-            return $this->view($data, Response::HTTP_NOT_FOUND);
-        }
-
-        //TODO build auth token
-        $token = '__dummy_token__';
-
-        $data = ['data' => [
-            'user' => $user,
-            'token' => $token
-        ]];
-        return $this->view($data, Response::HTTP_OK);
     }
 
 }
