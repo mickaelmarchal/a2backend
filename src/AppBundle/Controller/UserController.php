@@ -18,7 +18,7 @@ class UserController extends FOSRestController
      */
     public function getUsersAction()
     {
-        return $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findAll();
+        return ['data' => $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->findAll()];
     }
 
     /**
@@ -31,7 +31,7 @@ class UserController extends FOSRestController
         $user = $this->getDoctrine()->getManager()->getRepository('AppBundle:User')->find($userId);
 
         if ($user) {
-            return $user;
+            return ['data' => $user];
         } else {
             return $this->userNotFound();
         }

@@ -26,10 +26,9 @@ Using the front-end, you can login using account `test@test.com` / password: `te
 
 
 ## TODO ##
-- decode + store JWT tokens and user data
 - securing JWT Allow-Origin with config parameter (localhost:* for dev)
-- sending JWT token with all requests
 - user roles and ACLs
 - handle 403 / 401
 - forgot password
 - 2 factor auth
+- XSRF protection for login and post requests
