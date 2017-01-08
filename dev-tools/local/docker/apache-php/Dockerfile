@@ -1,23 +1,19 @@
-FROM php:7.0-apache
+FROM php:7.1-apache
 
 # Install PHP plugins
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng12-dev \
-    libmcrypt-dev \
     libxslt-dev \
     unzip \
-    imagemagick \
     mysql-client \
-    default-jre \
   && docker-php-ext-install \
     pdo_mysql \
     mysqli \
     mbstring \
     gd \
     iconv \
-    mcrypt \
     xsl \
     pcntl \
   && rm -rf /var/lib/apt/lists/*
@@ -34,7 +30,7 @@ RUN cd $HOME &&\
     curl -LsS https://symfony.com/installer -o /usr/local/bin/symfony &&\
     chmod a+x /usr/local/bin/symfony
 
-# Install dev tools: phing, PHPUnit, PHPDox, PHPCodeSniffer, Robo.li with user "dev"
+# Install dev tools: phing, PHPUnit, PHPDox, PHPCodeSniffer with user "dev"
 RUN useradd -ms /bin/bash dev
 USER dev
 

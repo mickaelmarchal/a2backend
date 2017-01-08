@@ -2,7 +2,7 @@ version: "2"
 services:
 
   mysql:
-    build: ./dev-tools/docker/mysql
+    build: ./dev-tools/local/docker/mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
     restart: always
@@ -12,7 +12,7 @@ services:
       - '3306:3306'
 
   apache-php:
-    build: ./dev-tools/docker/apache-php
+    build: ./dev-tools/local/docker/apache-php
     ports:
       - '80:80'
       - '443:443'
